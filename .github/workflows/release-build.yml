@@ -45,7 +45,7 @@ jobs:
 
             ## 1.1 一键安装
             ```sh
-            curl -sSL https://raw.githubusercontent.com/gcsong023/wrt_installer/wrt_1panel/quick_start.sh -o quick_start.sh && bash quick_start.sh
+            curl -sSL https://raw.githubusercontent.com/dragonzhao93/wrt_installer/wrt_1panel/quick_start.sh -o quick_start.sh && bash quick_start.sh
             ```
 
             ## 1.2 在线升级
