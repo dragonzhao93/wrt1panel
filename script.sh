@@ -28,18 +28,18 @@ if ! command -v wget >/dev/null; then
 fi
 
 if [ ! -f "1pctl" ]; then 
-  wget https://raw.githubusercontent.com/gcsong023/wrt_installer/wrt_1panel/1pctl
+  wget https://raw.githubusercontent.com/dragonzhao93/wrt_installer/wrt_1panel/1pctl
 fi
 
 if [ ! -f "1panel.service" ]; then 
-  wget  https://raw.githubusercontent.com/gcsong023/wrt_installer/wrt_1panel/1panel.service
+  wget  https://raw.githubusercontent.com/dragonzhao93/wrt_installer/wrt_1panel/1panel.service
 fi
 
 if [ ! -f "install.sh" ]; then 
-  wget https://raw.githubusercontent.com/gcsong023/wrt_installer/wrt_1panel/install.sh
+  wget https://raw.githubusercontent.com/dragonzhao93/wrt_installer/wrt_1panel/install.sh
 fi
 
 if [ ! -f "1paneld" ]; then 
-  wget https://raw.githubusercontent.com/gcsong023/wrt_installer/wrt_1panel/etc/init.d/1paneld
+  wget https://raw.githubusercontent.com/dragonzhao93/wrt_installer/wrt_1panel/etc/init.d/1paneld
 fi
 chmod 755 1pctl install.sh

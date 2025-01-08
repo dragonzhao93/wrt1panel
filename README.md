@@ -42,12 +42,12 @@ curl -sSL https://resource.fit2cloud.com/1panel/package/quick_start.sh -o quick_
 在 openwrt 终端 执行如下命令在openwrt中一键安装wrt1panel或官方1Panel :
 
 ```sh
-curl -sSL https://raw.githubusercontent.com/gcsong023/wrt_installer/wrt_1panel/quick_start.sh -o quick_start.sh && bash quick_start.sh
+curl -sSL https://raw.githubusercontent.com/dragonzhao93/wrt_installer/wrt_1panel/quick_start.sh -o quick_start.sh && bash quick_start.sh
 ```
-本仓库ACTIONS编译的二进制文件及压缩包，请到[releases](https://github.com/gcsong023/wrt1panel/releases)查看、下载。
+本仓库ACTIONS编译的二进制文件及压缩包，请到[releases](https://github.com/dragonzhao93/wrt1panel/releases)查看、下载。
 
 ### 安装过程中遇到问题
-一些常见的安装问题及解决办法，请到[wrt_installer](https://github.com/gcsong023/wrt_installer)查看。
+一些常见的安装问题及解决办法，请到[wrt_installer](https://github.com/dragonzhao93/wrt_installer)查看。
 
 
 ## License

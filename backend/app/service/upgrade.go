@@ -278,7 +278,7 @@ func (u *UpgradeService) loadVersion(isLatest bool, currentVersion string) (stri
 		return "", fmt.Errorf("current version is error format: %s", currentVersion)
 	}
 	if wrtFound {
-		repo := "gcsong023/wrt1panel"
+		repo := "dragonzhao93/wrt1panel"
 		version, err := getLatestReleaseTag(repo)
 		if err != nil {
 			return "", buserr.New(constant.ErrOSSConn)
