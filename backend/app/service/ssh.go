@@ -312,11 +312,11 @@ func (u *SSHService) LoadLog(req dto.SearchSSHLog) (*dto.SSHLog, error) {
 		if strings.HasPrefix(path.Base(file.Name), "secure") {
 			switch req.Status {
 			case constant.StatusSuccess:
-				commandItem = fmt.Sprintf("cat %s | grep -a Accepted %s", file.Name, command)
+				commandItem = fmt.Sprintf("cat %s | grep -a Password auth succeeded %s", file.Name, command)
 			case constant.StatusFailed:
-				commandItem = fmt.Sprintf("cat %s | grep -a 'Failed password for' %s", file.Name, command)
+				commandItem = fmt.Sprintf("cat %s | grep -a 'Bad password attempt for' %s", file.Name, command)
 			default:
-				commandItem = fmt.Sprintf("cat %s | grep -aE '(Failed password for|Accepted)' %s", file.Name, command)
+				commandItem = fmt.Sprintf("cat %s | grep -aE '(Bad password attempt for|Password auth succeeded for)' %s", file.Name, command)
 			}
 		}
 		if strings.HasPrefix(path.Base(file.Name), "auth.log") {
