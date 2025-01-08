@@ -450,19 +450,38 @@ func loadSSHData(command string, showCountFrom, showCountTo, currentYear int, qq
 	}
 	return datas, successCount, failedCount
 }
-
 func loadSuccessDatas(line string) dto.SSHHistory {
 	var data dto.SSHHistory
 	parts := strings.Fields(line)
-	index, dataStr := analyzeDateStr(parts)
+	index, dataStr, isDropbear := analyzeDateStr(parts)
 	if dataStr == "" {
 		return data
 	}
 	data.DateStr = dataStr
-	data.AuthMode = parts[4+index]
-	data.User = parts[6+index]
-	data.Address = parts[8+index]
-	data.Port = parts[10+index]
+
+	if isDropbear {
+		// Dropbear 日志格式解析
+		for i, part := range parts {
+			if part == "for" && i+1 < len(parts) {
+				data.User = parts[i+1]
+			}
+			if part == "from" && i+1 < len(parts) {
+				addrPort := strings.Split(parts[i+1], ":")
+				if len(addrPort) == 2 {
+					data.Address = addrPort[0]
+					data.Port = addrPort[1]
+				}
+			}
+		}
+		data.AuthMode = "Password" // 假定为 Password，需根据日志具体内容调整
+	} else {
+		// OpenSSH 日志格式解析
+		data.AuthMode = parts[4+index]
+		data.User = parts[6+index]
+		data.Address = parts[8+index]
+		data.Port = parts[10+index]
+	}
+
 	data.Status = constant.StatusSuccess
 	return data
 }
@@ -470,42 +489,83 @@ func loadSuccessDatas(line string) dto.SSHHistory {
 func loadFailedAuthDatas(line string) dto.SSHHistory {
 	var data dto.SSHHistory
 	parts := strings.Fields(line)
-	index, dataStr := analyzeDateStr(parts)
+	index, dataStr, isDropbear := analyzeDateStr(parts)
 	if dataStr == "" {
 		return data
 	}
 	data.DateStr = dataStr
-	if index == 2 {
-		data.User = parts[10]
+
+	if isDropbear {
+		// Dropbear 日志格式解析
+		for i, part := range parts {
+			if part == "for" && i+1 < len(parts) {
+				data.User = parts[i+1]
+			}
+			if part == "from" && i+1 < len(parts) {
+				addrPort := strings.Split(parts[i+1], ":")
+				if len(addrPort) == 2 {
+					data.Address = addrPort[0]
+					data.Port = addrPort[1]
+				}
+			}
+		}
+		data.AuthMode = "Password" // 假定为 Password，需根据日志具体内容调整
 	} else {
-		data.User = parts[7]
+		// OpenSSH 日志格式解析
+		if index == 2 {
+			data.User = parts[10]
+		} else {
+			data.User = parts[7]
+		}
+		data.AuthMode = parts[6+index]
+		data.Address = parts[9+index]
+		data.Port = parts[11+index]
 	}
-	data.AuthMode = parts[6+index]
-	data.Address = parts[9+index]
-	data.Port = parts[11+index]
+
 	data.Status = constant.StatusFailed
 	if strings.Contains(line, ": ") {
 		data.Message = strings.Split(line, ": ")[1]
 	}
 	return data
 }
+
 func loadFailedSecureDatas(line string) dto.SSHHistory {
 	var data dto.SSHHistory
 	parts := strings.Fields(line)
-	index, dataStr := analyzeDateStr(parts)
+	index, dataStr, isDropbear := analyzeDateStr(parts)
 	if dataStr == "" {
 		return data
 	}
 	data.DateStr = dataStr
-	if strings.Contains(line, " invalid ") {
-		data.AuthMode = parts[4+index]
-		index += 2
+
+	if isDropbear {
+		// Dropbear 日志格式解析
+		for i, part := range parts {
+			if part == "for" && i+1 < len(parts) {
+				data.User = parts[i+1]
+			}
+			if part == "from" && i+1 < len(parts) {
+				addrPort := strings.Split(parts[i+1], ":")
+				if len(addrPort) == 2 {
+					data.Address = addrPort[0]
+					data.Port = addrPort[1]
+				}
+			}
+		}
+		data.AuthMode = "Password" // 假定为 Password，需根据日志具体内容调整
 	} else {
-		data.AuthMode = parts[4+index]
+		// OpenSSH 日志格式解析
+		if strings.Contains(line, " invalid ") {
+			data.AuthMode = parts[4+index]
+			index += 2
+		} else {
+			data.AuthMode = parts[4+index]
+		}
+		data.User = parts[6+index]
+		data.Address = parts[8+index]
+		data.Port = parts[10+index]
 	}
-	data.User = parts[6+index]
-	data.Address = parts[8+index]
-	data.Port = parts[10+index]
+
 	data.Status = constant.StatusFailed
 	if strings.Contains(line, ": ") {
 		data.Message = strings.Split(line, ": ")[1]
@@ -537,16 +597,24 @@ func loadDate(currentYear int, DateStr string, nyc *time.Location) time.Time {
 	return itemDate
 }
 
-func analyzeDateStr(parts []string) (int, string) {
+func analyzeDateStr(parts []string) (int, string, bool) {
+	// 尝试解析 OpenSSH 的时间格式
 	t, err := time.Parse("2006-01-02T15:04:05.999999-07:00", parts[0])
-	if err != nil {
-		if len(parts) < 14 {
-			return 0, ""
+	if err == nil {
+		if len(parts) < 12 {
+			return 0, "", false
 		}
-		return 2, fmt.Sprintf("%s %s %s", parts[0], parts[1], parts[2])
+		return 0, t.Format("2006 Jan 2 15:04:05"), false
 	}
-	if len(parts) < 12 {
-		return 0, ""
+
+	// 尝试解析 Dropbear 的时间格式
+	if len(parts) >= 3 {
+		dropbearTimeStr := fmt.Sprintf("%s %s %s", parts[0], parts[1], parts[2])
+		_, err := time.Parse("Jan 2 15:04:05", dropbearTimeStr)
+		if err == nil {
+			return 3, dropbearTimeStr, true
+		}
 	}
-	return 0, t.Format("2006 Jan 2 15:04:05")
+
+	return 0, "", false
 }
