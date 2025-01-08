@@ -21,26 +21,26 @@ type FirewallClient interface {
 }
 
 func NewFail2Ban() (*Fail2ban, error) {
-    isExist, _ := true
-    if isExist {
-        if _, err := os.Stat(defaultPath); err != nil {
-            if err := initLocalFile(); err != nil {
-                return nil, err
-            }
-            stdout, err := cmd.Exec("/etc/init.d/fail2ban restart")
-            if err != nil {
-                global.LOG.Errorf("restart fail2ban failed, err: %s", stdout)
-                return nil, err
-            }
-        }
-    }
-    return &Fail2ban{}, nil
+	isExist := true
+	if isExist {
+		if _, err := os.Stat(defaultPath); err != nil {
+			if err := initLocalFile(); err != nil {
+				return nil, err
+			}
+			stdout, err := cmd.Exec("/etc/init.d/fail2ban restart")
+			if err != nil {
+				global.LOG.Errorf("restart fail2ban failed, err: %s", stdout)
+				return nil, err
+			}
+		}
+	}
+	return &Fail2ban{}, nil
 }
 
 func (f *Fail2ban) Status() (bool, bool, bool) {
-	isEnable, _ := true
-	isActive, _ := true
-	isExist, _ := true
+	isEnable := true
+	isActive := true
+	isExist := true
 
 	return isEnable, isActive, isExist
 }
